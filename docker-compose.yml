@@ -1,0 +1,64 @@
+services:
+  g4-oradb:
+    container_name: g4-oradb
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    environment:
+      ORACLE_PWD: g4password
+      ORACLE_SID: XE
+      ORACLE_PDB: XEPDB1
+      ORACLE_CHARACTERSET: AL32UTF8
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    volumes:
+      - g4-volume:/opt/oracle/oradata
+      - ./scripts:/opt/oracle/scripts/startup
+    networks:
+      - g4-network
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo 'SELECT 1 FROM DUAL;' | sqlplus system/Netec_123@localhost:1521/XE"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+  ms-eventos:
+    image: ms-eventos:1.0  
+    container_name: ms-eventos
+    ports:
+      - "9081:9081"
+    environment:
+      USER_DEMO: Netec
+    networks:
+      - g4-network
+    depends_on:
+      g4-oradb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9081/eventos"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+  ms-participantes:
+    image: ms-participantes:1.0
+    container_name: ms-participantes
+    ports:
+      - "9084:9084"
+    environment:
+      MS_EVENTOS_URL: http://ms-eventos:9081/eventos
+    networks:
+      - g4-network
+    depends_on:
+      ms-eventos:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9084/participantes"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+volumes:
+  g4-volume:
+networks:
+  g4-network:
+    external: true

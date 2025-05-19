@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ms-eventos-config
+  namespace: default
+data:
+  application.yml: |
+    spring:
+      application:
+        name: ms-eventos
+      datasource:
+        url: jdbc:oracle:thin:@//g4-oradb:1521/XEPDB1
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+        driver-class-name: oracle.jdbc.OracleDriver
+    server:
+      port: 9081
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+      endpoint:
+        health:
+          show-details: always
+          probes:
+            enabled: true
+      health:
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
+

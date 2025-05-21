@@ -70,7 +70,7 @@ spec:
             - name: config-volume
               mountPath: /config/
               subPath: application.yml
-
+      restartPolicy: Always
       volumes:
         - name: config-volume
           configMap:

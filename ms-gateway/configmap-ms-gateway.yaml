@@ -20,9 +20,9 @@ data:
             - id: ms-participantes
               uri: lb://ms-participantes
               predicates:
-                - Path=/api3/**
+                - Path=/api2/**
               filters:
-                - RewritePath=/api3/(?<segment>.*), /$\{segment}
+                - RewritePath=/api2/(?<segment>.*), /$\{segment}
     server:
       port: 9099
 
